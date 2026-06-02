@@ -1,57 +1,39 @@
 let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
-renderCustomers();
-
-function addCustomer() {
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const date = document.getElementById("date").value;
-  const notes = document.getElementById("notes").value;
-
-  const customer = {
-    id: Date.now(),
-    name,
-    phone,
-    date,
-    notes
-  };
-
-  customers.push(customer);
+function save() {
   localStorage.setItem("customers", JSON.stringify(customers));
-
-  renderCustomers();
-  clearInputs();
+  render();
 }
 
-function renderCustomers() {
-  const list = document.getElementById("list");
+function addCustomerPrompt() {
+  const name = prompt("Customer name:");
+  if (!name) return;
+
+  const email = prompt("Customer email:");
+  if (!email) return;
+
+  customers.push({ name, email });
+  save();
+}
+
+function deleteCustomer(index) {
+  customers.splice(index, 1);
+  save();
+}
+
+function render() {
+  const list = document.getElementById("customerList");
   list.innerHTML = "";
 
-  customers.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "customer";
-
-    div.innerHTML = `
-      <strong>${c.name}</strong><br/>
-      📞 ${c.phone}<br/>
-      📅 ${c.date}<br/>
-      📝 ${c.notes}<br/>
-      <button onclick="deleteCustomer(${c.id})">Delete</button>
+  customers.forEach((c, i) => {
+    list.innerHTML += `
+      <div class="card">
+        <h3>${c.name}</h3>
+        <p>${c.email}</p>
+        <button onclick="deleteCustomer(${i})">Delete</button>
+      </div>
     `;
-
-    list.appendChild(div);
   });
 }
 
-function deleteCustomer(id) {
-  customers = customers.filter(c => c.id !== id);
-  localStorage.setItem("customers", JSON.stringify(customers));
-  renderCustomers();
-}
-
-function clearInputs() {
-  document.getElementById("name").value = "";
-  document.getElementById("phone").value = "";
-  document.getElementById("date").value = "";
-  document.getElementById("notes").value = "";
-}
+render();
