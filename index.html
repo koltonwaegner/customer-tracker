@@ -2,33 +2,168 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Customer Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Customer workspace</p>
+      <h1>Customer Tracker</h1>
+      <p class="subtitle">Track people, follow-ups, notes, and next best actions in one dependable place.</p>
+    </div>
+    <div class="header-actions" aria-label="Data actions">
+      <button class="ghost-button" id="exportButton" type="button">Export</button>
+      <label class="ghost-button file-button" for="importFile">Import</label>
+      <input id="importFile" type="file" accept="application/json" />
+    </div>
+  </header>
 
-  <div class="app">
+  <main class="app-shell">
+    <section class="panel form-panel" aria-labelledby="customerFormTitle">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow">Add or edit</p>
+          <h2 id="customerFormTitle">Customer details</h2>
+        </div>
+        <button class="text-button" id="resetFormButton" type="button">Clear</button>
+      </div>
 
-    <aside class="sidebar">
-      <h2>Tracker</h2>
-      <p>Dashboard</p>
-      <p>Customers</p>
-      <p>Settings</p>
-    </aside>
+      <form id="customerForm" novalidate>
+        <input id="customerId" type="hidden" />
 
-    <main class="main">
+        <div class="field">
+          <label for="name">Name <span aria-hidden="true">*</span></label>
+          <input id="name" autocomplete="name" placeholder="Jordan Lee" required />
+          <small class="error" id="nameError"></small>
+        </div>
 
-      <header class="header">
-        <h1>Customer Tracker</h1>
-        <button onclick="addCustomerPrompt()">+ Add Customer</button>
-      </header>
+        <div class="split-fields">
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" inputmode="tel" autocomplete="tel" placeholder="555-0134" />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" autocomplete="email" placeholder="jordan@example.com" />
+            <small class="error" id="emailError"></small>
+          </div>
+        </div>
 
-      <div id="customerList" class="grid"></div>
+        <div class="split-fields">
+          <div class="field">
+            <label for="status">Status</label>
+            <select id="status">
+              <option value="Lead">Lead</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Proposal">Proposal</option>
+              <option value="Active">Active</option>
+              <option value="Won">Won</option>
+              <option value="Lost">Lost</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="priority">Priority</label>
+            <select id="priority">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
 
-    </main>
+        <div class="split-fields">
+          <div class="field">
+            <label for="lastContact">Last contact</label>
+            <input id="lastContact" type="date" />
+          </div>
+          <div class="field">
+            <label for="nextFollowUp">Next follow-up</label>
+            <input id="nextFollowUp" type="date" />
+          </div>
+        </div>
 
-  </div>
+        <div class="field">
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="5" placeholder="What matters to this customer? Budget, timeline, objections, commitments, preferences..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary-button" id="saveButton" type="submit">Save customer</button>
+          <button class="secondary-button" id="aiDraftButton" type="button">Draft follow-up</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="workspace">
+      <section class="metrics" aria-label="Customer summary">
+        <article class="metric">
+          <span id="totalCustomers">0</span>
+          <p>Total customers</p>
+        </article>
+        <article class="metric urgent">
+          <span id="dueFollowUps">0</span>
+          <p>Due follow-ups</p>
+        </article>
+        <article class="metric">
+          <span id="activeDeals">0</span>
+          <p>Active opportunities</p>
+        </article>
+      </section>
+
+      <section class="panel ai-panel" aria-labelledby="aiTitle">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow">AI assistant</p>
+            <h2 id="aiTitle">Action coach</h2>
+          </div>
+          <button class="text-button" id="refreshAiButton" type="button">Refresh</button>
+        </div>
+        <div class="assistant-grid">
+          <div>
+            <h3>Focus now</h3>
+            <ul id="aiInsights" class="insight-list"></ul>
+          </div>
+          <div>
+            <h3>Suggested message</h3>
+            <textarea id="aiDraft" rows="7" readonly placeholder="Choose a customer or add details to draft a helpful follow-up."></textarea>
+            <button class="secondary-button copy-button" id="copyDraftButton" type="button">Copy message</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel list-panel" aria-labelledby="customerListTitle">
+        <div class="panel-title list-title">
+          <div>
+            <p class="eyebrow">Pipeline</p>
+            <h2 id="customerListTitle">Customers</h2>
+          </div>
+          <div class="list-controls">
+            <input id="search" type="search" placeholder="Search names, notes, phone, email" />
+            <select id="statusFilter" aria-label="Filter by status">
+              <option value="All">All statuses</option>
+              <option value="Lead">Lead</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Proposal">Proposal</option>
+              <option value="Active">Active</option>
+              <option value="Won">Won</option>
+              <option value="Lost">Lost</option>
+            </select>
+            <select id="sortBy" aria-label="Sort customers">
+              <option value="followUp">Follow-up date</option>
+              <option value="priority">Priority</option>
+              <option value="name">Name</option>
+              <option value="updated">Recently updated</option>
+            </select>
+          </div>
+        </div>
+        <div id="customerList" class="customer-list" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="app.js"></script>
 </body>
